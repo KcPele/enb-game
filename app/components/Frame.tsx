@@ -20,7 +20,7 @@ export const Frame: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center">
-      <h1 className="text-2xl font-medium mb-4 text-white">Base Mini App</h1>
+      <h1 className="text-2xl font-medium mb-4 text-white">Mini Art</h1>
       <a
         href="https://github.com/yourusername/ock-frames-template"
         target="_blank"
