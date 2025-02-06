@@ -1,5 +1,9 @@
 # OnchainKit Frames v2 Template
 
+[![](/public/miniart.gif)](https://ock-frames-template.vercel.app)
+
+Fork it on [Replit](https://replit.com/@tina-he/ock-frames-template?v=1#README.md).
+
 A modern, full-featured template for building Farcaster Frames v2 applications with OnchainKit. This template provides everything you need to create interactive frame experiences with wallet integration and NFT minting capabilities.
 
 ![Template Preview](/public/window.svg)
