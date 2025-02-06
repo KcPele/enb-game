@@ -1,36 +1,137 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OnchainKit Frames v2 Template
 
-## Getting Started
+A modern, full-featured template for building Farcaster Frames v2 applications with OnchainKit. This template provides everything you need to create interactive frame experiences with wallet integration and NFT minting capabilities.
 
-First, run the development server:
+![Template Preview](/public/window.svg)
 
+## ✨ Features
+
+### Frame Integration
+- 🖼️ Built-in Farcaster Frames v2 support
+- 🔄 Dynamic frame state management
+- 🎨 Customizable frame metadata
+- 🖱️ Interactive button handling
+- 🏃‍♂️ Edge runtime support
+
+### Wallet Features
+- 👛 Seamless wallet connection via OnchainKit
+- 👤 User profile display with avatars
+- 💰 Built-in fund linking
+- 🔌 Easy disconnect functionality
+
+### NFT Integration
+- 🎨 NFT minting via OnchainKit
+- 💎 Base network support
+- 🔒 Secure transaction handling
+- 📱 Mobile-responsive design
+
+### Technical Stack
+- [Frames v2](https://docs.farcaster.xyz/developers/frames/v2)
+- [OnchainKit](https://onchainkit.xyz)
+- [Next.js](https://nextjs.org)
+- [Tailwind CSS](https://tailwindcss.com)
+
+## 🚀 Quick Start
+
+1. **Clone and Install**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/yourusername/ock-frames-template.git
+cd ock-frames-template
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Set Up Environment**
+Create a `.env.local` file:
+```env
+NEXT_PUBLIC_ONCHAINKIT_API_KEY=your_api_key_here
+NEXT_PUBLIC_HOST=your_host_url # Optional, for production
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Start Development**
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Visit [http://localhost:3000](http://localhost:3000) to see your app.
 
-## Learn More
+## 📁 Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+app/
+├── components/           # React components
+│   ├── Frame.tsx        # Main frame component
+│   └── WalletComponents.tsx
+├── api/                 # API routes
+│   └── frame/          # Frame endpoints
+├── frames.ts           # Frame configuration
+├── layout.tsx          # Root layout
+└── page.tsx            # Home page
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠️ Configuration
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Frame Configuration
+Edit `app/frames.ts` to customize your frame:
+```typescript
+export const frameMetadata = {
+  buttons: [
+    {
+      label: "Mint NFT",
+      action: "post"
+    }
+  ],
+  image: {
+    src: "/window.svg",
+    aspectRatio: "1:1"
+  }
+  // ... additional options
+};
+```
 
-## Deploy on Vercel
+### NFT Settings
+Update the NFT contract in `app/components/Frame.tsx`:
+```typescript
+<NFTMintCardDefault
+  contractAddress='your_contract_address'
+  tokenId='your_token_id'
+/>
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🎨 Styling
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The template uses Tailwind CSS with custom animations and glass-morphism effects. Customize the look in:
+- `app/globals.css` - Global styles and animations
+- `tailwind.config.ts` - Tailwind configuration
+
+## 📚 API Reference
+
+### Frame Endpoint
+- `POST /api/frame`
+  - Handles frame interactions
+  - Returns updated frame state
+  - Supports dynamic image generation
+
+### Wallet Integration
+The `WalletComponents` component provides:
+- Wallet connection/disconnection
+- Profile display
+- Address management
+- Fund linking
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Built with [OnchainKit](https://onchainkit.xyz)
+- Powered by [Farcaster Frames](https://docs.farcaster.xyz/developers/frames/v2)
+- Created with [Next.js](https://nextjs.org)
