@@ -5,38 +5,26 @@ import { frameMetadata } from '../../frames';
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     // Return the initial frame state
-    return new NextResponse(
-      JSON.stringify({
+    return NextResponse.json(
+      {
         ...frameMetadata,
         image: {
           src: `${process.env.NEXT_PUBLIC_HOST || req.nextUrl.origin}/window.svg`,
-          aspectRatio: "1:1"
+          aspectRatio: "1:1",
         },
         buttons: [
           {
             label: "Mint NFT",
-            action: "post"
-          }
-        ]
-      }),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
+            action: "post",
+          },
+        ],
+      },
+      { status: 200 }
     );
   } catch (error) {
+    // Log error for debugging
     console.error('Frame error:', error);
-    return new NextResponse(
-      JSON.stringify({ error: 'Internal Server Error' }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
 

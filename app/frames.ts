@@ -1,4 +1,18 @@
-export const frameMetadata = {
+interface FrameMetadata {
+  buttons: {
+    label: string;
+    action: string;
+  }[];
+  image: {
+    src: string;
+    aspectRatio: string;
+  };
+  postUrl: string;
+  version: string;
+  ogImage: string;
+}
+
+export const frameMetadata: FrameMetadata = {
   buttons: [
     {
       label: "Mint NFT",
