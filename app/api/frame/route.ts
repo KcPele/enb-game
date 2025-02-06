@@ -28,7 +28,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const host = process.env.NEXT_PUBLIC_HOST || req.nextUrl.origin;
-    const data = await req.json();
     
     // After the user clicks "Launch App", redirect them to the full app
     return NextResponse.json({
