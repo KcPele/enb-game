@@ -35,7 +35,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       frames: [{
         version: "vNext",
         image: `${host}/preview.png`,
-        action: "link",
+        action: "link", 
         target: `${host}`
       }]
     });
