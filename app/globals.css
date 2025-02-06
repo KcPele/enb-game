@@ -3,19 +3,96 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #000000;
+  --foreground: #ededed;
+  --card-bg: rgba(23, 25, 35, 0.6);
+  --card-border: rgba(255, 255, 255, 0.1);
+  --card-glow: rgba(103, 232, 249, 0.1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes gradientMove {
+  0% {
+    opacity: 0.5;
+    transform: scale(1);
   }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+}
+
+.background-gradient {
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
+  z-index: -1;
+  background: #000;
+  overflow: hidden;
+}
+
+.background-gradient::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 30% 30%, 
+    rgba(103, 232, 249, 0.15) 0%, 
+    rgba(103, 232, 249, 0.05) 30%,
+    transparent 70%
+  );
+  animation: gradientMove 8s ease-in-out infinite;
+}
+
+.background-gradient::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 70% 70%, 
+    rgba(15, 23, 42, 0.3) 0%, 
+    rgba(15, 23, 42, 0.1) 30%,
+    transparent 70%
+  );
+  animation: gradientMove 8s ease-in-out infinite reverse;
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 15px var(--card-glow); }
+  50% { box-shadow: 0 0 25px var(--card-glow); }
+  100% { box-shadow: 0 0 15px var(--card-glow); }
+}
+
+.glass-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+  animation: pulse 3s infinite;
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px var(--card-glow);
+}
+
+a {
+  transition: all 0.2s ease;
+  border-bottom: 1px solid transparent;
+}
+
+a:hover {
+  color: #67e8f9;
+  border-bottom: 1px solid #67e8f9;
 }
