@@ -15,9 +15,28 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const frameMetadata = {
+  version: "next",
+  imageUrl: "https://ock-frames-template.vercel.app/preview.png",
+  button: {
+    title: "Mini Art",
+    action: {
+      type: "launch_frame",
+      name: "Base Mini App",
+      url: "https://ock-frames-template.vercel.app",
+      splashImageUrl: "https://ock-frames-template.vercel.app/splash.png",
+      splashBackgroundColor: "#000000"
+    }
+  }
+};
+
 export const metadata: Metadata = {
   title: "Frames v2 Template",
   description: "A template for building Farcaster Frames v2 apps",
+  other: {
+    "fc:frame": JSON.stringify(frameMetadata),
+    "og:image": frameMetadata.imageUrl,
+  },
 };
 
 interface RootLayoutProps {
