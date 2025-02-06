@@ -1,28 +1,46 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { frameMetadata } from '../../frames';
+
+export async function GET(req: NextRequest): Promise<NextResponse> {
+  const host = process.env.NEXT_PUBLIC_HOST || req.nextUrl.origin;
+  
+  // Initial frame view - this should be your app's home page
+  return NextResponse.json({
+    version: "vNext",
+    title: "Frames v2 Demo",
+    ogImage: `${host}/preview.png`,
+    // This is the important part - setting the homeUrl makes this a full app frame
+    homeUrl: `${host}`,
+    frames: [{
+      version: "vNext",
+      image: `${host}/preview.png`,
+      buttons: [
+        {
+          label: "Launch App",
+          action: "post"
+        }
+      ],
+      postUrl: `${host}/api/frame`
+    }]
+  });
+}
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
-    // Return the initial frame state
-    return NextResponse.json(
-      {
-        ...frameMetadata,
-        image: {
-          src: `${process.env.NEXT_PUBLIC_HOST || req.nextUrl.origin}/window.svg`,
-          aspectRatio: "1:1",
-        },
-        buttons: [
-          {
-            label: "Mint NFT",
-            action: "post",
-          },
-        ],
-      },
-      { status: 200 }
-    );
+    const host = process.env.NEXT_PUBLIC_HOST || req.nextUrl.origin;
+    const data = await req.json();
+    
+    // After the user clicks "Launch App", redirect them to the full app
+    return NextResponse.json({
+      version: "vNext",
+      frames: [{
+        version: "vNext",
+        image: `${host}/preview.png`,
+        action: "link",
+        target: `${host}`
+      }]
+    });
   } catch (error) {
-    // Log error for debugging
     console.error('Frame error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }

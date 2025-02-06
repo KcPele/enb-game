@@ -35,7 +35,7 @@ A modern, full-featured template for building Farcaster Frames v2 applications w
 
 1. **Clone and Install**
 ```bash
-git clone https://github.com/yourusername/ock-frames-template.git
+git clone https://github.com/fakepixels/ock-frames-template.git
 cd ock-frames-template
 npm install
 ```

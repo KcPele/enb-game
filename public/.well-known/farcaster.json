@@ -1,25 +1,14 @@
 {
-  "accountAssociation": {
-    "header": "",
-    "payload": "",
-    "signature": ""
-  },
   "frame": {
-    "version": "1",
-    "name": "Base Mini App",
-    "homeUrl": "https://ock-frames-template.vercel.app",
-    "iconUrl": "https://ock-frames-template.vercel.app/icon.png",
-    "imageUrl": "https://ock-frames-template.vercel.app/preview.png",
-    "buttonTitle": "Mint NFT",
-    "splashImageUrl": "https://ock-frames-template.vercel.app/splash.png",
-    "splashBackgroundColor": "#000000"
-  },
-  "triggers": [
-    {
-      "type": "cast",
-      "id": "mint-nft",
-      "url": "https://ock-frames-template.vercel.app/api/frame",
-      "name": "Mint NFT"
-    }
-  ]
+    "version": "2",
+    "image": "https://ock-frames-template.vercel.app/preview.png",
+    "buttons": [
+      {
+        "label": "Mint NFT",
+        "action": "post"
+      }
+    ],
+    "postUrl": "https://ock-frames-template.vercel.app/api/frame",
+    "ogImage": "https://ock-frames-template.vercel.app/window.svg"
+  }
 }

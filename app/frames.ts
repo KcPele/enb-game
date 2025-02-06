@@ -20,10 +20,10 @@ export const frameMetadata: FrameMetadata = {
     }
   ],
   image: {
-    src: "/window.svg",
+    src: `${process.env.NEXT_PUBLIC_HOST || 'https://ock-frames-template.vercel.app'}/window.svg`,
     aspectRatio: "1:1"
   },
-  postUrl: "/api/frame",
-  version: "vNext",
-  ogImage: "/window.svg"
+  postUrl: `${process.env.NEXT_PUBLIC_HOST || 'https://ock-frames-template.vercel.app'}/api/frame`,
+  version: "2",
+  ogImage: `${process.env.NEXT_PUBLIC_HOST || 'https://ock-frames-template.vercel.app'}/window.svg`
 };

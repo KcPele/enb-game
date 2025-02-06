@@ -5,16 +5,36 @@ import { WalletComponents } from './WalletComponents';
 import { useAccount } from 'wagmi';
 import { NFTMintCardDefault } from '@coinbase/onchainkit/nft';
 import { Github } from 'lucide-react';
+import sdk from '@farcaster/frame-sdk';
 
 export const Frame: React.FC = () => {
   const [mounted, setMounted] = useState(false);
+  const [isSDKLoaded, setIsSDKLoaded] = useState(false);
   const { isConnected } = useAccount();
+
+  // Initialize Frame SDK
+  useEffect(() => {
+    const initializeSDK = async () => {
+      try {
+        // Tell the parent Farcaster client that our frame is ready
+        await sdk.actions.ready();
+        setIsSDKLoaded(true);
+      } catch (error) {
+        console.error('Failed to initialize Frame SDK:', error);
+      }
+    };
+
+    if (!isSDKLoaded) {
+      initializeSDK();
+    }
+  }, [isSDKLoaded]);
+
   // Wait for component to mount to avoid hydration issues
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
+  if (!mounted || !isSDKLoaded) {
     return null;
   }
 
@@ -22,7 +42,7 @@ export const Frame: React.FC = () => {
     <div className="flex flex-col items-center justify-center">
       <h1 className="text-2xl font-medium mb-4 text-white">Mini Art</h1>
       <a
-        href="https://github.com/yourusername/ock-frames-template"
+        href="https://github.com/fakepixels/ock-frames-template"
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center gap-2 px-4 py-2 text-sm text-white/80 
