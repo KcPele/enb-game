@@ -61,7 +61,7 @@ export const Frame: React.FC = () => {
 
   const handleTaskComplete = (task: Task) => {
     console.log(`Task completed: ${task.title}`);
-    handleTaskClick("1");
+
     // In a real app, this would trigger a reward or update user progress
   };
 
@@ -71,18 +71,6 @@ export const Frame: React.FC = () => {
       <p className="text-white/70 mb-4 text-center max-w-md">
         Complete tasks on Base to earn ENB tokens and rewards
       </p>
-
-      <a
-        href="https://github.com/fakepixels/ock-frames-template"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 px-4 py-2 text-sm text-white/80 
-        bg-white/5 hover:bg-white/10 backdrop-blur-sm rounded-lg transition-all 
-        border border-white/10 hover:border-white/20 mb-6"
-      >
-        <Github className="w-4 h-4" />
-        <span>View on GitHub</span>
-      </a>
 
       <div className="space-y-4 w-full max-w-xl">
         <div className="glass-card p-6 rounded-xl relative z-50">
