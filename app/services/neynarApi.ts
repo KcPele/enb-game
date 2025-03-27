@@ -222,21 +222,26 @@ export async function checkUserFollowsChannel(
       return false;
     }
 
-    // Check if the user follows the channel using the user's channel list
-    // Using the improved /user/channels endpoint to get all channels the user follows
-    const userChannelsResponse = await fetchNeynarApi("/user/channels", {
+    // Use the channel/member/list endpoint to directly check if the user is a member
+    // This is more efficient than fetching all channels the user follows
+    const memberResponse = await fetchNeynarApi("/channel/member/list", {
+      channel_id: exactChannel.id,
       fid: followerFid.toString(),
-      limit: "100", // Set a reasonable limit
     });
 
-    // Check if the channel is in the list of followed channels
-    if (userChannelsResponse && userChannelsResponse.channels) {
-      return userChannelsResponse.channels.some(
-        (channel: { id: string; name: string }) =>
-          channel.id.toLowerCase() === exactChannel.id.toLowerCase()
+    // If the API returns a non-empty members array, the user is a member of the channel
+    if (
+      memberResponse &&
+      memberResponse.members &&
+      memberResponse.members.length > 0
+    ) {
+      // Additional check to verify the returned member is the one we're looking for
+      return memberResponse.members.some(
+        (member: { user: { fid: number } }) => member.user.fid === followerFid
       );
     }
 
+    // If we received a response but no members, the user is not a member
     return false;
   } catch (error) {
     console.error(
@@ -244,164 +249,6 @@ export async function checkUserFollowsChannel(
       error
     );
     return false;
-  }
-}
-
-/**
- * Get user profile data
- * @param fid The FID of the user
- * @param viewerFid Optional FID of the viewer for contextual information
- * @returns The user profile data or null if not found
- */
-export async function getUserProfile(fid: number, viewerFid?: number) {
-  try {
-    // Use the /user endpoint to get user data by FID
-    const params: Record<string, string> = {
-      fid: fid.toString(),
-    };
-
-    // Add viewer_fid if provided
-    if (viewerFid) {
-      params.viewer_fid = viewerFid.toString();
-    }
-
-    const response = await fetchNeynarApi("/user", params);
-
-    if (response && response.user) {
-      return response.user;
-    }
-
-    return null;
-  } catch (error) {
-    console.error(`Error fetching user profile for fid ${fid}:`, error);
-    return null;
-  }
-}
-
-/**
- * Get user feed (casts from people the user follows)
- * @param fid The FID of the user
- * @param limit Number of casts to fetch (default: 25)
- * @returns The user's feed or empty array if error
- */
-export async function getUserFeed(fid: number, limit: number = 25) {
-  try {
-    // Use the /feed/following endpoint to get the user's feed
-    const response = await fetchNeynarApi("/feed/following", {
-      fid: fid.toString(),
-      limit: limit.toString(),
-    });
-
-    if (response && response.casts) {
-      return response.casts;
-    }
-
-    return [];
-  } catch (error) {
-    console.error(`Error fetching feed for fid ${fid}:`, error);
-    return [];
-  }
-}
-
-/**
- * Search for users by username match
- * @param query The search query
- * @param limit Maximum number of results to return (default: 25)
- * @returns Array of matching users or empty array if none found
- */
-export async function searchUsers(query: string, limit: number = 25) {
-  try {
-    // Use the /user/search endpoint to search for users
-    const response = await fetchNeynarApi("/user/search", {
-      q: query,
-      limit: limit.toString(),
-    });
-
-    if (response && response.users) {
-      return response.users;
-    }
-
-    return [];
-  } catch (error) {
-    console.error(`Error searching for users with query ${query}:`, error);
-    return [];
-  }
-}
-
-/**
- * Get users by FIDs
- * @param fids Array of FIDs to fetch users for
- * @param viewerFid Optional FID of the viewing user
- * @returns Array of user objects or empty array if none found
- */
-export async function getUsersByFids(fids: number[], viewerFid?: number) {
-  try {
-    // Use the /user/bulk endpoint to get users by their FIDs
-    const params: Record<string, string> = {
-      fids: fids.join(","),
-    };
-
-    if (viewerFid) {
-      params.viewer_fid = viewerFid.toString();
-    }
-
-    const response = await fetchNeynarApi("/user/bulk", params);
-
-    if (response && response.users) {
-      return response.users;
-    }
-
-    return [];
-  } catch (error) {
-    console.error(`Error fetching users by FIDs:`, error);
-    return [];
-  }
-}
-
-/**
- * Get a user's followers
- * @param fid The FID of the user whose followers to fetch
- * @param viewerFid Optional FID of the viewer for contextual information
- * @param limit Number of followers to fetch (default: 20, max: 100)
- * @param cursor Pagination cursor for fetching more results
- * @param sortType Sort order for followers, defaults to 'desc_chron'
- * @returns Object with followers array and next cursor, or null if error
- */
-export async function getUserFollowers(
-  fid: number,
-  viewerFid?: number,
-  limit: number = 20,
-  cursor?: string,
-  sortType: "desc_chron" = "desc_chron"
-) {
-  try {
-    const params: Record<string, string> = {
-      fid: fid.toString(),
-      limit: Math.min(limit, 100).toString(),
-      sort_type: sortType,
-    };
-
-    if (viewerFid) {
-      params.viewer_fid = viewerFid.toString();
-    }
-
-    if (cursor) {
-      params.cursor = cursor;
-    }
-
-    const response = await fetchNeynarApi("/followers", params);
-
-    if (response) {
-      return {
-        followers: response.users || [],
-        next: response.next || null,
-      };
-    }
-
-    return { followers: [], next: null };
-  } catch (error) {
-    console.error(`Error fetching followers for fid ${fid}:`, error);
-    return null;
   }
 }
 

@@ -53,14 +53,9 @@ export async function POST(req: NextRequest) {
         verified: verificationResult.isFollowing,
         taskId,
         fid: verificationResult.fid, // Return the FID used for verification
-        username: verificationResult.username, // Return the username if available
-        displayName: verificationResult.displayName, // Return the display name if available
+
         message: verificationResult.isFollowing
-          ? `Successfully verified that you (${
-              verificationResult.displayName ||
-              verificationResult.username ||
-              ""
-            }) follow ${metadata.accountHandle}`
+          ? `Successfully verified that you follow ${metadata.accountHandle}`
           : `Could not verify that you follow ${metadata.accountHandle}. Please follow and try again.`,
       });
     } else if ("channelName" in metadata) {
@@ -88,15 +83,10 @@ export async function POST(req: NextRequest) {
         success: true,
         verified: verificationResult.isFollowing,
         taskId,
-        fid: verificationResult.fid, // Return the FID used for verification
-        username: verificationResult.username, // Return the username if available
-        displayName: verificationResult.displayName, // Return the display name if available
+        fid, // Return the FID used for verification
+
         message: verificationResult.isFollowing
-          ? `Successfully verified that you (${
-              verificationResult.displayName ||
-              verificationResult.username ||
-              ""
-            }) follow ${metadata.channelName}`
+          ? `Successfully verified that you follow ${metadata.channelName}`
           : `Could not verify that you follow ${metadata.channelName}. Please follow and try again.`,
       });
     } else {
