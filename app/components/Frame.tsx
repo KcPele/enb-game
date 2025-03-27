@@ -6,10 +6,12 @@ import { useAccount } from "wagmi";
 import sdk from "@farcaster/frame-sdk";
 import TaskList from "./tasks/TaskList";
 import PointsDisplay from "./PointsDisplay";
+import { FrameContext } from "../types/frame";
 
 export const Frame: React.FC = () => {
   const [mounted, setMounted] = useState(false);
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
+  const [context, setContext] = useState<FrameContext | null>(null);
   const { isConnected } = useAccount();
 
   // Initialize Frame SDK
@@ -17,6 +19,21 @@ export const Frame: React.FC = () => {
     const initializeSDK = async () => {
       try {
         // Tell the parent Farcaster client that our frame is ready
+        const frameContext = (await sdk.context) as unknown as FrameContext;
+        setContext(frameContext);
+
+        // Store user data in localStorage if available
+        if (frameContext?.user) {
+          localStorage.setItem(
+            "farcaster_user",
+            JSON.stringify({
+              fid: frameContext.user.fid,
+              username: frameContext.user.username,
+              displayName: frameContext.user.displayName,
+            })
+          );
+        }
+
         await sdk.actions.ready();
         setIsSDKLoaded(true);
       } catch (error) {
@@ -69,10 +86,19 @@ export const Frame: React.FC = () => {
             Onboarding Tasks
           </h2>
           <div>
-            <TaskList />
+            <TaskList farcasterContext={context} />
           </div>
         </div>
       </div>
+
+      {context?.user && (
+        <div className="mt-4 p-4 glass-card rounded-lg text-xs text-white/70">
+          <p>
+            Connected as: {context.user.displayName} ({context.user.username})
+          </p>
+          <p>FID: {context.user.fid}</p>
+        </div>
+      )}
 
       <div className="mt-6 text-center text-xs text-white/50">
         <div className="mt-2 space-x-2">

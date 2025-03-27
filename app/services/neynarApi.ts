@@ -123,7 +123,7 @@ export async function lookupUserByUsername(
     ) {
       // Find the exact match
       const exactMatch = searchResponse.users.find(
-        (user: any) =>
+        (user: { username: string; fid: number }) =>
           user.username.toLowerCase() === normalizedUsername.toLowerCase()
       );
 
@@ -211,7 +211,7 @@ export async function checkUserFollowsChannel(
 
     // Find the exact channel match
     const exactChannel = channelResponse.channels.find(
-      (channel: any) =>
+      (channel: { id: string; name: string }) =>
         channel.id.toLowerCase() === normalizedChannelName.toLowerCase() ||
         (channel.name &&
           channel.name.toLowerCase() === normalizedChannelName.toLowerCase())
@@ -223,7 +223,8 @@ export async function checkUserFollowsChannel(
     }
 
     // Check if the user follows the channel using the user's channel list
-    const userChannelsResponse = await fetchNeynarApi("/channel/following", {
+    // Using the improved /user/channels endpoint to get all channels the user follows
+    const userChannelsResponse = await fetchNeynarApi("/user/channels", {
       fid: followerFid.toString(),
       limit: "100", // Set a reasonable limit
     });
@@ -231,7 +232,7 @@ export async function checkUserFollowsChannel(
     // Check if the channel is in the list of followed channels
     if (userChannelsResponse && userChannelsResponse.channels) {
       return userChannelsResponse.channels.some(
-        (channel: any) =>
+        (channel: { id: string; name: string }) =>
           channel.id.toLowerCase() === exactChannel.id.toLowerCase()
       );
     }
@@ -354,5 +355,90 @@ export async function getUsersByFids(fids: number[], viewerFid?: number) {
   } catch (error) {
     console.error(`Error fetching users by FIDs:`, error);
     return [];
+  }
+}
+
+/**
+ * Get a user's followers
+ * @param fid The FID of the user whose followers to fetch
+ * @param viewerFid Optional FID of the viewer for contextual information
+ * @param limit Number of followers to fetch (default: 20, max: 100)
+ * @param cursor Pagination cursor for fetching more results
+ * @param sortType Sort order for followers, defaults to 'desc_chron'
+ * @returns Object with followers array and next cursor, or null if error
+ */
+export async function getUserFollowers(
+  fid: number,
+  viewerFid?: number,
+  limit: number = 20,
+  cursor?: string,
+  sortType: "desc_chron" = "desc_chron"
+) {
+  try {
+    const params: Record<string, string> = {
+      fid: fid.toString(),
+      limit: Math.min(limit, 100).toString(),
+      sort_type: sortType,
+    };
+
+    if (viewerFid) {
+      params.viewer_fid = viewerFid.toString();
+    }
+
+    if (cursor) {
+      params.cursor = cursor;
+    }
+
+    const response = await fetchNeynarApi("/followers", params);
+
+    if (response) {
+      return {
+        followers: response.users || [],
+        next: response.next || null,
+      };
+    }
+
+    return { followers: [], next: null };
+  } catch (error) {
+    console.error(`Error fetching followers for fid ${fid}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Get a user's following list (channels)
+ * @param fid The FID of the user
+ * @param limit Number of channels to fetch (default: 25, max: 100)
+ * @param cursor Pagination cursor for fetching more results
+ * @returns Object with channels array and next cursor, or null if error
+ */
+export async function getUserFollowingChannels(
+  fid: number,
+  limit: number = 25,
+  cursor?: string
+) {
+  try {
+    const params: Record<string, string> = {
+      fid: fid.toString(),
+      limit: Math.min(limit, 100).toString(),
+    };
+
+    if (cursor) {
+      params.cursor = cursor;
+    }
+
+    const response = await fetchNeynarApi("/user/channels", params);
+
+    if (response) {
+      return {
+        channels: response.channels || [],
+        next: response.next || null,
+      };
+    }
+
+    return { channels: [], next: null };
+  } catch (error) {
+    console.error(`Error fetching following channels for fid ${fid}:`, error);
+    return null;
   }
 }

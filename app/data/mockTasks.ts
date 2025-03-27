@@ -15,7 +15,7 @@ export const mockTasks: Task[] = [
   },
   {
     id: "2",
-    title: "Follow @kokocodes on Farcaster",
+    title: "@kokocodes",
     description:
       "Follow @kokocodes on Farcaster to stay connected with the community.",
     type: TaskType.FOLLOW_ACCOUNT,
@@ -26,7 +26,7 @@ export const mockTasks: Task[] = [
   },
   {
     id: "3",
-    title: "Follow @kcpele.eth on Farcaster",
+    title: "@kcpele.eth",
     description: "Follow @kcpele.eth on Farcaster to join the conversation.",
     type: TaskType.FOLLOW_ACCOUNT,
     status: TaskStatus.NOT_STARTED,
@@ -36,7 +36,7 @@ export const mockTasks: Task[] = [
   },
   {
     id: "4",
-    title: "Follow /base channel on Farcaster",
+    title: "/base channel",
     description:
       "Join the /base channel on Farcaster to stay updated on Base network developments.",
     type: TaskType.FOLLOW_CHANNEL,
@@ -47,7 +47,7 @@ export const mockTasks: Task[] = [
   },
   {
     id: "5",
-    title: "Follow @baseafrica on Farcaster",
+    title: "@baseafrica",
     description:
       "Follow @baseafrica on Farcaster to connect with the Base community in Africa.",
     type: TaskType.FOLLOW_ACCOUNT,

@@ -3,11 +3,13 @@ export enum TaskType {
   CONNECT_WALLET = "connect_wallet",
   FOLLOW_ACCOUNT = "follow_account",
   FOLLOW_CHANNEL = "follow_channel",
+  VISIT_PAGE = "visit_page",
 }
 
 // Task status enum to track progress
 export enum TaskStatus {
   NOT_STARTED = "not_started",
+  IN_PROGRESS = "in_progress",
   COMPLETED = "completed",
 }
 
@@ -39,6 +41,13 @@ export interface FollowAccountTask extends Task {
 export interface FollowChannelTask extends Task {
   type: TaskType.FOLLOW_CHANNEL;
   channelName: string; // Channel name to follow (e.g., /base)
+}
+
+// Task that requires visiting a page
+export interface VisitPageTask extends Task {
+  type: TaskType.VISIT_PAGE;
+  pageUrl: string; // URL to visit
+  minTimeSeconds: number; // Minimum time to spend on page (in seconds)
 }
 
 // User progress and points tracking

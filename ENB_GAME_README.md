@@ -109,6 +109,27 @@ This project uses Neynar API for Farcaster user and channel verification. To set
 
 The API key is sent as the `x-api-key` header to the Neynar API endpoints.
 
+#### Farcaster API Features Implemented
+
+The Neynar API integration provides the following features:
+
+- **User Verification**: Verify if a user's wallet has a linked Farcaster account
+- **Follow Verification**: Check if a user follows another user or channel
+- **User Profile Data**: Retrieve detailed user profile information
+- **Follower List**: Get paginated list of a user's followers
+- **Following Channels**: Get all channels a user follows
+
+The implementation leverages the following Neynar API endpoints:
+
+- `/user/custody-address` - Maps wallet addresses to Farcaster FIDs
+- `/user/by_username` - Looks up users by their username
+- `/user/bulk` - Retrieves information about multiple users by FIDs
+- `/followers` - Gets a list of a user's followers with pagination
+- `/user/channels` - Gets all channels a user follows
+- `/channel/search` - Searches for channels by name
+
+This robust integration ensures reliable verification for game tasks related to Farcaster activity.
+
 ## Contributing
 
 Contributions are welcome! Please check the todo.md file for specific tasks that need to be implemented.

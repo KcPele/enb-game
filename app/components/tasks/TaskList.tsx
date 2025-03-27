@@ -8,14 +8,42 @@ import {
   getUserProgress,
 } from "../../data/mockTasks";
 import { useAccount } from "wagmi";
+import { FrameContext } from "../../types/frame";
 
-export const TaskList = () => {
+interface TaskListProps {
+  farcasterContext: FrameContext | null;
+}
+
+export const TaskList = ({ farcasterContext }: TaskListProps) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [verifying, setVerifying] = useState<string | null>(null);
   const { address, isConnected } = useAccount();
   const [walletTaskSaved, setWalletTaskSaved] = useState(false);
   const [farcasterFid, setFarcasterFid] = useState<number | null>(null);
+
+  // Load Farcaster FID from context if available
+  useEffect(() => {
+    if (farcasterContext?.user?.fid) {
+      setFarcasterFid(farcasterContext.user.fid);
+    } else {
+      // Try to load from localStorage as fallback
+      try {
+        const storedUser = localStorage.getItem("farcaster_user");
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          if (userData.fid) {
+            setFarcasterFid(userData.fid);
+          }
+        }
+      } catch (error) {
+        console.error(
+          "Error loading Farcaster user data from localStorage:",
+          error
+        );
+      }
+    }
+  }, [farcasterContext]);
 
   // Load tasks and check for completed tasks in localStorage
   useEffect(() => {
@@ -238,7 +266,7 @@ export const TaskList = () => {
       {!isConnected && (
         <p className="text-white/70 mb-4 text-sm">
           Connect your wallet to start earning points by completing Farcaster
-          follow tasks.
+          follow tasks. ID: {farcasterFid}
         </p>
       )}
 

@@ -36,6 +36,7 @@ A modern, full-featured template for building Farcaster Frames v2 applications w
 - [OnchainKit](https://onchainkit.xyz)
 - [Next.js](https://nextjs.org)
 - [Tailwind CSS](https://tailwindcss.com)
+- [Frames repo](https://github.com/farcasterxyz/frames-v2-demo?tab=readme-ov-file)
 
 ## 🚀 Quick Start
 

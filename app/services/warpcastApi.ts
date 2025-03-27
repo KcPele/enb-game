@@ -3,8 +3,9 @@ import {
   checkUserFollowsChannel,
   checkUserFollowsUser,
   getWalletFid,
-  getUsersByFids,
   getUserProfile,
+  getUserFollowingChannels,
+  getUserFollowers,
 } from "./neynarApi";
 
 const WARPCAST_API_BASE_URL = "https://api.warpcast.com";
@@ -101,11 +102,31 @@ export async function verifyFollowStatus(
         ? targetToFollow
         : `/${targetToFollow}`;
 
-      // Check if user follows the channel
+      // Remove leading slash for comparison with API response
+      const channelId = formattedChannelName.startsWith("/")
+        ? formattedChannelName.substring(1)
+        : formattedChannelName;
+
+      // First try using the direct channel check
       isFollowing = await checkUserFollowsChannel(
         userFid,
         formattedChannelName
       );
+
+      // If the direct check fails, try using the new getUserFollowingChannels function
+      if (!isFollowing) {
+        const followingChannels = await getUserFollowingChannels(userFid);
+
+        if (followingChannels && followingChannels.channels) {
+          isFollowing = followingChannels.channels.some(
+            (channel: { id: string; name: string }) =>
+              (channel.id &&
+                channel.id.toLowerCase() === channelId.toLowerCase()) ||
+              (channel.name &&
+                channel.name.toLowerCase() === channelId.toLowerCase())
+          );
+        }
+      }
     } else {
       // Format account handle by adding @ if not present
       const formattedUsername = targetToFollow.startsWith("@")
@@ -128,6 +149,115 @@ export async function verifyFollowStatus(
       isFollowing: false,
       error:
         "Error verifying follow status. The Neynar API may be experiencing issues.",
+    };
+  }
+}
+
+/**
+ * Get a paginated list of followers for a Farcaster user
+ *
+ * @param fid The Farcaster ID of the user
+ * @param viewerFid Optional FID of the viewer for contextual information
+ * @param limit Number of followers to fetch per page (max 100)
+ * @param cursor Pagination cursor for fetching more results
+ * @returns Object with followers array, pagination info, and error if any
+ */
+export async function getFarcasterFollowers(
+  fid: number,
+  viewerFid?: number,
+  limit: number = 20,
+  cursor?: string
+) {
+  try {
+    // Verify the FID is valid first
+    const userProfile = await getUserProfile(fid);
+
+    if (!userProfile) {
+      return {
+        followers: [],
+        error: "Invalid Farcaster ID. User not found.",
+        next: null,
+      };
+    }
+
+    // Get the followers using the Neynar API
+    const followersData = await getUserFollowers(fid, viewerFid, limit, cursor);
+
+    if (!followersData) {
+      return {
+        followers: [],
+        error:
+          "Error fetching followers. The Neynar API may be experiencing issues.",
+        next: null,
+      };
+    }
+
+    return {
+      followers: followersData.followers,
+      username: userProfile.username,
+      displayName: userProfile.display_name || userProfile.username,
+      followerCount: userProfile.follower_count,
+      next: followersData.next,
+    };
+  } catch (error) {
+    console.error(`Error fetching followers for FID ${fid}:`, error);
+    return {
+      followers: [],
+      error: "An unexpected error occurred while fetching followers.",
+      next: null,
+    };
+  }
+}
+
+/**
+ * Get a paginated list of channels that a Farcaster user follows
+ *
+ * @param fid The Farcaster ID of the user
+ * @param limit Number of channels to fetch per page (max 100)
+ * @param cursor Pagination cursor for fetching more results
+ * @returns Object with channels array, pagination info, and error if any
+ */
+export async function getUserFollowedChannels(
+  fid: number,
+  limit: number = 25,
+  cursor?: string
+) {
+  try {
+    // Verify the FID is valid first
+    const userProfile = await getUserProfile(fid);
+
+    if (!userProfile) {
+      return {
+        channels: [],
+        error: "Invalid Farcaster ID. User not found.",
+        next: null,
+      };
+    }
+
+    // Get the channels the user follows using the Neynar API
+    const channelsData = await getUserFollowingChannels(fid, limit, cursor);
+
+    if (!channelsData) {
+      return {
+        channels: [],
+        error:
+          "Error fetching followed channels. The Neynar API may be experiencing issues.",
+        next: null,
+      };
+    }
+
+    return {
+      channels: channelsData.channels,
+      username: userProfile.username,
+      displayName: userProfile.display_name || userProfile.username,
+      next: channelsData.next,
+    };
+  } catch (error) {
+    console.error(`Error fetching followed channels for FID ${fid}:`, error);
+    return {
+      channels: [],
+      error: "An unexpected error occurred while fetching followed channels.",
+      next: null,
     };
   }
 }

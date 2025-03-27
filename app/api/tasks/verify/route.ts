@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { TaskType } from "../../../types/task";
 import { verifyFollowStatus } from "../../../services/warpcastApi";
 import { taskMetadata } from "../../../data/mockTasks";
 

@@ -90,9 +90,11 @@ export const TaskDetail = ({ taskId, onComplete, onBack }: TaskDetailProps) => {
       case TaskType.CONNECT_WALLET:
         return "Connect your wallet to complete this task. Your wallet connection will be verified automatically.";
       case TaskType.VISIT_PAGE:
-        return "Visit the specified page and spend at least 30 seconds browsing to complete this task.";
+        return "Visit the specified page and spend at least 30 seconds browsing to complete this task. Click the verify button when done.";
       case TaskType.FOLLOW_CHANNEL:
         return "Follow the specified channel and verify your follow to complete this task.";
+      case TaskType.FOLLOW_ACCOUNT:
+        return "Follow the specified Farcaster account and verify your follow to complete this task.";
       default:
         return "Complete the requirements to earn points for this task.";
     }
