@@ -14,7 +14,19 @@ export const TaskList = () => {
     // In a real app, this would fetch tasks from an API
     setTasks(mockTasks);
     setLoading(false);
-  }, []);
+  }, [isConnected]);
+
+  useEffect(() => {
+    if (isConnected) {
+      const updatedTasks = tasks.map((task) => {
+        if (task.type === "connect_wallet") {
+          return { ...task, status: TaskStatus.COMPLETED };
+        }
+        return task;
+      });
+      setTasks(updatedTasks);
+    }
+  }, [isConnected, tasks]);
 
   const getStatusClass = (status: TaskStatus) => {
     switch (status) {
@@ -39,19 +51,6 @@ export const TaskList = () => {
       </div>
     );
   }
-
-  // Auto-update wallet connection task status if wallet is connected
-  useEffect(() => {
-    if (isConnected) {
-      const updatedTasks = tasks.map((task) => {
-        if (task.type === "connect_wallet") {
-          return { ...task, status: TaskStatus.COMPLETED };
-        }
-        return task;
-      });
-      setTasks(updatedTasks);
-    }
-  }, [isConnected, tasks]);
 
   return (
     <div className="space-y-4 w-full">

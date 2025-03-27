@@ -1,14 +1,14 @@
 {
   "frame": {
     "version": "2",
-    "image": "https://ock-frames-template.vercel.app/preview.png",
+    "image": "https://enb-game.vercel.app/preview.png",
     "buttons": [
       {
         "label": "Mint NFT",
         "action": "post"
       }
     ],
-    "postUrl": "https://ock-frames-template.vercel.app/api/frame",
-    "ogImage": "https://ock-frames-template.vercel.app/window.svg"
+    "postUrl": "https://enb-game.vercel.app/api/frame",
+    "ogImage": "https://enb-game.vercel.app/window.svg"
   }
 }

@@ -61,6 +61,7 @@ export const Frame: React.FC = () => {
 
   const handleTaskComplete = (task: Task) => {
     console.log(`Task completed: ${task.title}`);
+    handleTaskClick("1");
     // In a real app, this would trigger a reward or update user progress
   };
 

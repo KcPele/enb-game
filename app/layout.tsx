@@ -1,9 +1,9 @@
-import '@coinbase/onchainkit/styles.css';
+import "@coinbase/onchainkit/styles.css";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Providers } from './providers';
-import type { JSX } from 'react';
+import { Providers } from "./providers";
+import type { JSX } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,22 +17,22 @@ const geistMono = Geist_Mono({
 
 const frameMetadata = {
   version: "next",
-  imageUrl: "https://ock-frames-template.vercel.app/preview.png",
+  imageUrl: "https://enb-game.vercel.app/preview.png",
   button: {
-    title: "Mini Art",
+    title: "Play Game",
     action: {
       type: "launch_frame",
-      name: "Base Mini App",
-      url: "https://ock-frames-template.vercel.app",
-      splashImageUrl: "https://ock-frames-template.vercel.app/splash.png",
-      splashBackgroundColor: "#000000"
-    }
-  }
+      name: "Everybody Needs Base",
+      url: "https://enb-game.vercel.app",
+      splashImageUrl: "https://enb-game.vercel.app/splash.png",
+      splashBackgroundColor: "#000000",
+    },
+  },
 };
 
 export const metadata: Metadata = {
-  title: "Frames v2 Template",
-  description: "A template for building Farcaster Frames v2 apps",
+  title: "Everybody Needs Base",
+  description: "Everybody Needs Base is a game about the importance of Base",
   other: {
     "fc:frame": JSON.stringify(frameMetadata),
     "og:image": frameMetadata.imageUrl,
