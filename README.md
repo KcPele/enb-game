@@ -138,11 +138,34 @@ The `WalletComponents` component provides:
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+ENB Game is an on-chain, task-based game designed to onboard new users to the Base blockchain. We welcome contributions that help expand the game's features and improve the user experience!
+
+### Contribution Areas
+
+- **Task Implementation**: Help create new task types and verification mechanisms
+- **Smart Contracts**: Contribute to the task tracking, character NFT, and reward distribution systems
+- **UI/UX Improvements**: Enhance the game interface and user experience
+- **Documentation**: Improve technical documentation and user guides
+- **Testing**: Write tests and report bugs
+
+### Getting Started
+
+1. Read our [CONTRIBUTING.md](CONTRIBUTING.md) file for detailed guidelines
+2. Check the [doc/todo.md](doc/todo.md) file for specific tasks that need implementation
+3. Fork the repository and create your feature branch (`git checkout -b feature/amazing-feature`)
+4. Implement your changes following the project's coding standards
+5. Test your changes thoroughly
+6. Commit your changes with clear messages (`git commit -m 'Add amazing feature'`)
+7. Push to your branch (`git push origin feature/amazing-feature`)
+8. Open a Pull Request with a detailed description of your changes
+
+### Development Resources
+
+- [Farcaster Documentation](https://docs.farcaster.xyz/developers/)
+- [Base Documentation](https://docs.base.org/)
+- [OnchainKit Documentation](https://onchainkit.xyz/)
+
+We appreciate all contributions that help make ENB Game better for everyone!
 
 ## 📄 License
 

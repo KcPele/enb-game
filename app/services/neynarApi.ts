@@ -157,15 +157,20 @@ export async function checkUserFollowsUser(
       return false;
     }
 
-    // Get the user with viewer context to check if following
-    const response = await fetchNeynarApi(`/user`, {
-      fid: targetFid.toString(),
+    // Use the /user/bulk endpoint to get user information with viewer context
+    const response = await fetchNeynarApi(`/user/bulk`, {
+      fids: targetFid.toString(),
       viewer_fid: followerFid.toString(),
     });
 
     // Check if the viewer (follower) is following the target user
-    if (response && response.user && response.user.viewer_context) {
-      return response.user.viewer_context.following === true;
+    if (
+      response &&
+      response.users &&
+      response.users.length > 0 &&
+      response.users[0].viewer_context
+    ) {
+      return response.users[0].viewer_context.following === true;
     }
 
     return false;
