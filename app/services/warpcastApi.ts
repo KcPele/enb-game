@@ -1,4 +1,11 @@
 // Service for Warpcast API interactions
+import {
+  checkUserFollowsChannel,
+  checkUserFollowsUser,
+  getWalletFid,
+  getUsersByFids,
+  getUserProfile,
+} from "./neynarApi";
 
 const WARPCAST_API_BASE_URL = "https://api.warpcast.com";
 
@@ -39,21 +46,88 @@ export async function fetchChannel(channelId: string) {
 }
 
 /**
- * Since the Warpcast API doesn't provide a direct endpoint to check follows,
- * we'll need to handle verification through our own API endpoint that will
- * use the Farcaster hub data or third-party providers like Neynar.
+ * Verify if a user follows an account or channel on Farcaster
+ * Uses the Neynar API for verification
  *
- * For now, this is a placeholder that will be extended with the verification logic.
+ * @param walletAddress The wallet address of the user
+ * @param targetToFollow The username or channel name to verify following status
+ * @param isChannel Whether the target is a channel (true) or user (false)
+ * @param fid Optional FID to use directly, bypassing wallet lookup
+ * @returns Object with follow status and error if any
  */
 export async function verifyFollowStatus(
   walletAddress: string,
   targetToFollow: string,
-  isChannel = false
+  isChannel = false,
+  fid?: number
 ) {
-  // This function will be extended with actual verification logic
-  // For now, return a placeholder response
-  return {
-    isFollowing: false,
-    error: "Verification API not yet implemented",
-  };
+  try {
+    // First, get the user's FID
+    let userFid = fid;
+
+    if (!userFid) {
+      const walletFid = await getWalletFid(walletAddress);
+
+      if (!walletFid) {
+        return {
+          isFollowing: false,
+          error:
+            "Could not find Farcaster ID associated with this wallet. Please provide your Farcaster FID.",
+          needsFid: true,
+        };
+      }
+
+      userFid = walletFid;
+    }
+
+    // Get user profile information to verify it's a valid FID
+    const userProfile = await getUserProfile(userFid, userFid);
+
+    if (!userProfile) {
+      return {
+        isFollowing: false,
+        error:
+          "Could not verify Farcaster user profile. Please check your FID.",
+        needsFid: true,
+      };
+    }
+
+    // Now verify the follow status
+    let isFollowing = false;
+
+    if (isChannel) {
+      // Format channel name by adding leading slash if not present
+      const formattedChannelName = targetToFollow.startsWith("/")
+        ? targetToFollow
+        : `/${targetToFollow}`;
+
+      // Check if user follows the channel
+      isFollowing = await checkUserFollowsChannel(
+        userFid,
+        formattedChannelName
+      );
+    } else {
+      // Format account handle by adding @ if not present
+      const formattedUsername = targetToFollow.startsWith("@")
+        ? targetToFollow
+        : `@${targetToFollow}`;
+
+      // Check if user follows the account
+      isFollowing = await checkUserFollowsUser(userFid, formattedUsername);
+    }
+
+    return {
+      isFollowing,
+      fid: userFid,
+      username: userProfile.username,
+      displayName: userProfile.display_name || userProfile.username,
+    };
+  } catch (error) {
+    console.error("Error verifying follow status:", error);
+    return {
+      isFollowing: false,
+      error:
+        "Error verifying follow status. The Neynar API may be experiencing issues.",
+    };
+  }
 }

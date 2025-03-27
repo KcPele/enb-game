@@ -1,17 +1,17 @@
 // Service for Neynar API interactions
 
-// Replace this with your actual Neynar API key
-// In production, this should be stored in environment variables
+// Configure Neynar API key
 const NEYNAR_API_KEY =
   process.env.NEXT_PUBLIC_NEYNAR_API_KEY || "NEYNAR_API_TEMP_KEY";
-const NEYNAR_API_BASE_URL = "https://api.neynar.com/v2";
+const NEYNAR_API_BASE_URL = "https://api.neynar.com/v2/farcaster";
 
 /**
  * Make a request to the Neynar API
  */
 async function fetchNeynarApi(
   endpoint: string,
-  params?: Record<string, string>
+  params?: Record<string, string>,
+  experimental: boolean = false
 ) {
   const url = new URL(`${NEYNAR_API_BASE_URL}${endpoint}`);
 
@@ -22,10 +22,11 @@ async function fetchNeynarApi(
     });
   }
 
-  // Add the API key header
+  // Add the API key header and experimental header if enabled
   const headers = {
     accept: "application/json",
-    api_key: NEYNAR_API_KEY,
+    "x-api-key": NEYNAR_API_KEY,
+    "x-neynar-experimental": experimental ? "true" : "false",
   };
 
   try {
@@ -49,10 +50,15 @@ export async function getWalletFid(
   walletAddress: string
 ): Promise<number | null> {
   try {
-    // Note: Neynar may not have a direct endpoint for wallet-to-FID lookup
-    // This would need to be implemented using alternative approaches
-    // For demonstration purposes, we're returning null
-    console.log(`Looking up FID for wallet: ${walletAddress}`);
+    // Uses the user/custody-address endpoint to find a user by their custody address
+    const response = await fetchNeynarApi("/user/custody-address", {
+      custody_address: walletAddress,
+    });
+
+    if (response && response.user && response.user.fid) {
+      return response.user.fid;
+    }
+
     return null;
   } catch (error) {
     console.error("Error getting FID from wallet:", error);
@@ -63,10 +69,12 @@ export async function getWalletFid(
 /**
  * Look up a user by their username
  * @param username The username to lookup (without the @ symbol)
+ * @param viewerFid Optional FID of the viewer for contextual information
  * @returns The user's FID or null if not found
  */
 export async function lookupUserByUsername(
-  username: string
+  username: string,
+  viewerFid?: number
 ): Promise<number | null> {
   try {
     // Remove @ if present
@@ -74,14 +82,47 @@ export async function lookupUserByUsername(
       ? username.substring(1)
       : username;
 
-    const response = await fetchNeynarApi("/user/search", {
-      q: normalizedUsername,
-      limit: "1",
-    });
+    // Use the by_username endpoint to find a user by their exact username
+    try {
+      const params: Record<string, string> = {
+        username: normalizedUsername,
+      };
 
-    if (response.users && response.users.length > 0) {
+      // Add viewer_fid if provided
+      if (viewerFid) {
+        params.viewer_fid = viewerFid.toString();
+      }
+
+      const response = await fetchNeynarApi(`/user/by_username`, params);
+
+      if (response && response.user) {
+        return response.user.fid;
+      }
+    } catch (usernameError) {
+      // If exact lookup fails, fallback to search
+      console.error(`Error looking up user by username: ${usernameError}`);
+    }
+
+    // Fallback to search
+    const searchParams: Record<string, string> = {
+      q: normalizedUsername,
+      limit: "10",
+    };
+
+    // Add viewer_fid to search params if provided
+    if (viewerFid) {
+      searchParams.viewer_fid = viewerFid.toString();
+    }
+
+    const searchResponse = await fetchNeynarApi("/user/search", searchParams);
+
+    if (
+      searchResponse &&
+      searchResponse.users &&
+      searchResponse.users.length > 0
+    ) {
       // Find the exact match
-      const exactMatch = response.users.find(
+      const exactMatch = searchResponse.users.find(
         (user: any) =>
           user.username.toLowerCase() === normalizedUsername.toLowerCase()
       );
@@ -109,25 +150,22 @@ export async function checkUserFollowsUser(
   targetUsername: string
 ): Promise<boolean> {
   try {
-    // First, get the target user's FID
-    const targetFid = await lookupUserByUsername(targetUsername);
+    // First, get the target user's FID, passing followerFid as viewer for context
+    const targetFid = await lookupUserByUsername(targetUsername, followerFid);
     if (!targetFid) {
       console.error(`Target user not found: ${targetUsername}`);
       return false;
     }
 
-    // Now check if follower follows target
-    // Note: This endpoint may need to be adjusted based on Neynar's actual API structure
-    const response = await fetchNeynarApi(`/user/followers`, {
+    // Get the user with viewer context to check if following
+    const response = await fetchNeynarApi(`/user`, {
       fid: targetFid.toString(),
-      limit: "100", // Set a reasonable limit
+      viewer_fid: followerFid.toString(),
     });
 
-    // Check if follower is in the list of followers
-    if (response.followers) {
-      return response.followers.some(
-        (follower: any) => follower.fid === followerFid
-      );
+    // Check if the viewer (follower) is following the target user
+    if (response && response.user && response.user.viewer_context) {
+      return response.user.viewer_context.following === true;
     }
 
     return false;
@@ -156,28 +194,45 @@ export async function checkUserFollowsChannel(
       ? channelName.substring(1)
       : channelName;
 
-    // First, check if the channel exists
-    const channelResponse = await fetchNeynarApi("/channel", {
-      id: normalizedChannelName,
+    // First, search for the channel using the /channel/search endpoint
+    const channelResponse = await fetchNeynarApi("/channel/search", {
+      q: normalizedChannelName,
+      limit: "10",
     });
 
-    if (!channelResponse || !channelResponse.channel) {
+    if (
+      !channelResponse ||
+      !channelResponse.channels ||
+      channelResponse.channels.length === 0
+    ) {
       console.error(`Channel not found: ${channelName}`);
       return false;
     }
 
-    // Now check if the user follows the channel
-    // Note: The actual endpoint will depend on Neynar's API structure
-    const followResponse = await fetchNeynarApi("/user/channels", {
+    // Find the exact channel match
+    const exactChannel = channelResponse.channels.find(
+      (channel: any) =>
+        channel.id.toLowerCase() === normalizedChannelName.toLowerCase() ||
+        (channel.name &&
+          channel.name.toLowerCase() === normalizedChannelName.toLowerCase())
+    );
+
+    if (!exactChannel) {
+      console.error(`Exact channel match not found for: ${channelName}`);
+      return false;
+    }
+
+    // Check if the user follows the channel using the user's channel list
+    const userChannelsResponse = await fetchNeynarApi("/channel/following", {
       fid: followerFid.toString(),
       limit: "100", // Set a reasonable limit
     });
 
     // Check if the channel is in the list of followed channels
-    if (followResponse.channels) {
-      return followResponse.channels.some(
+    if (userChannelsResponse && userChannelsResponse.channels) {
+      return userChannelsResponse.channels.some(
         (channel: any) =>
-          channel.id.toLowerCase() === normalizedChannelName.toLowerCase()
+          channel.id.toLowerCase() === exactChannel.id.toLowerCase()
       );
     }
 
@@ -188,5 +243,116 @@ export async function checkUserFollowsChannel(
       error
     );
     return false;
+  }
+}
+
+/**
+ * Get user profile data
+ * @param fid The FID of the user
+ * @param viewerFid Optional FID of the viewer for contextual information
+ * @returns The user profile data or null if not found
+ */
+export async function getUserProfile(fid: number, viewerFid?: number) {
+  try {
+    // Use the /user endpoint to get user data by FID
+    const params: Record<string, string> = {
+      fid: fid.toString(),
+    };
+
+    // Add viewer_fid if provided
+    if (viewerFid) {
+      params.viewer_fid = viewerFid.toString();
+    }
+
+    const response = await fetchNeynarApi("/user", params);
+
+    if (response && response.user) {
+      return response.user;
+    }
+
+    return null;
+  } catch (error) {
+    console.error(`Error fetching user profile for fid ${fid}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Get user feed (casts from people the user follows)
+ * @param fid The FID of the user
+ * @param limit Number of casts to fetch (default: 25)
+ * @returns The user's feed or empty array if error
+ */
+export async function getUserFeed(fid: number, limit: number = 25) {
+  try {
+    // Use the /feed/following endpoint to get the user's feed
+    const response = await fetchNeynarApi("/feed/following", {
+      fid: fid.toString(),
+      limit: limit.toString(),
+    });
+
+    if (response && response.casts) {
+      return response.casts;
+    }
+
+    return [];
+  } catch (error) {
+    console.error(`Error fetching feed for fid ${fid}:`, error);
+    return [];
+  }
+}
+
+/**
+ * Search for users by username match
+ * @param query The search query
+ * @param limit Maximum number of results to return (default: 25)
+ * @returns Array of matching users or empty array if none found
+ */
+export async function searchUsers(query: string, limit: number = 25) {
+  try {
+    // Use the /user/search endpoint to search for users
+    const response = await fetchNeynarApi("/user/search", {
+      q: query,
+      limit: limit.toString(),
+    });
+
+    if (response && response.users) {
+      return response.users;
+    }
+
+    return [];
+  } catch (error) {
+    console.error(`Error searching for users with query ${query}:`, error);
+    return [];
+  }
+}
+
+/**
+ * Get users by FIDs
+ * @param fids Array of FIDs to fetch users for
+ * @param viewerFid Optional FID of the viewing user
+ * @returns Array of user objects or empty array if none found
+ */
+export async function getUsersByFids(fids: number[], viewerFid?: number) {
+  try {
+    // Use the /user/bulk endpoint to get users by their FIDs
+    const params: Record<string, string> = {
+      fids: fids.join(","),
+    };
+
+    if (viewerFid) {
+      params.viewer_fid = viewerFid.toString();
+    }
+
+    const response = await fetchNeynarApi("/user/bulk", params);
+
+    if (response && response.users) {
+      return response.users;
+    }
+
+    return [];
+  } catch (error) {
+    console.error(`Error fetching users by FIDs:`, error);
+    return [];
   }
 }

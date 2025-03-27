@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { TaskType } from "../../../types/task";
-import {
-  checkUserFollowsChannel,
-  checkUserFollowsUser,
-  getWalletFid,
-} from "../../../services/neynarApi";
+import { verifyFollowStatus } from "../../../services/warpcastApi";
 import { taskMetadata } from "../../../data/mockTasks";
 
 // Directly verify if a user follows an account or channel on Farcaster
@@ -31,55 +27,77 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let userFid = fid;
+    // Determine the type of task and verify accordingly
+    if ("accountHandle" in metadata) {
+      // This is an account follow task
+      const verificationResult = await verifyFollowStatus(
+        walletAddress,
+        metadata.accountHandle,
+        false, // Not a channel
+        fid // Pass the FID if provided
+      );
 
-    // If user provided wallet address but not FID, try to get FID from wallet
-    if (!userFid && walletAddress) {
-      userFid = await getWalletFid(walletAddress);
-
-      // If we couldn't get a FID from the wallet, prompt user to provide it
-      if (!userFid) {
+      // If verification needs FID, return proper response
+      if (verificationResult.needsFid) {
         return NextResponse.json(
           {
             success: false,
-            error:
-              "Could not determine Farcaster ID from wallet address. Please provide your Farcaster FID.",
+            error: verificationResult.error,
             needsFid: true,
           },
           { status: 400 }
         );
       }
-    }
-
-    // Determine the type of task and verify accordingly
-    if ("accountHandle" in metadata) {
-      // This is an account follow task
-      const isFollowing = await checkUserFollowsUser(
-        userFid,
-        metadata.accountHandle
-      );
 
       return NextResponse.json({
         success: true,
-        verified: isFollowing,
+        verified: verificationResult.isFollowing,
         taskId,
-        message: isFollowing
-          ? `Successfully verified that you follow ${metadata.accountHandle}`
+        fid: verificationResult.fid, // Return the FID used for verification
+        username: verificationResult.username, // Return the username if available
+        displayName: verificationResult.displayName, // Return the display name if available
+        message: verificationResult.isFollowing
+          ? `Successfully verified that you (${
+              verificationResult.displayName ||
+              verificationResult.username ||
+              ""
+            }) follow ${metadata.accountHandle}`
           : `Could not verify that you follow ${metadata.accountHandle}. Please follow and try again.`,
       });
     } else if ("channelName" in metadata) {
       // This is a channel follow task
-      const isFollowing = await checkUserFollowsChannel(
-        userFid,
-        metadata.channelName
+      const verificationResult = await verifyFollowStatus(
+        walletAddress,
+        metadata.channelName,
+        true, // Is a channel
+        fid // Pass the FID if provided
       );
+
+      // If verification needs FID, return proper response
+      if (verificationResult.needsFid) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: verificationResult.error,
+            needsFid: true,
+          },
+          { status: 400 }
+        );
+      }
 
       return NextResponse.json({
         success: true,
-        verified: isFollowing,
+        verified: verificationResult.isFollowing,
         taskId,
-        message: isFollowing
-          ? `Successfully verified that you follow ${metadata.channelName}`
+        fid: verificationResult.fid, // Return the FID used for verification
+        username: verificationResult.username, // Return the username if available
+        displayName: verificationResult.displayName, // Return the display name if available
+        message: verificationResult.isFollowing
+          ? `Successfully verified that you (${
+              verificationResult.displayName ||
+              verificationResult.username ||
+              ""
+            }) follow ${metadata.channelName}`
           : `Could not verify that you follow ${metadata.channelName}. Please follow and try again.`,
       });
     } else {

@@ -10,6 +10,7 @@ The project is built using:
 - [Farcaster Frames](https://docs.farcaster.xyz/reference/frames/spec) for cast integration
 - [OnchainKit](https://onchainkit.xyz/) for wallet connections and blockchain interactions
 - [Tailwind CSS](https://tailwindcss.com/) for styling
+- [Neynar API](https://docs.neynar.com/) for Farcaster user verification
 
 ## Current Implementation Status
 
@@ -32,6 +33,13 @@ These are the components that have been implemented so far:
   - ✅ "Connect wallet" task
   - ✅ "Visit a page" task
   - ✅ "Follow a channel" task
+  - ✅ "Follow a user" task with Neynar verification
+
+### Farcaster Integration
+
+- ✅ Frame Integration for sharing
+- ✅ Neynar API Integration for user follow verification
+- ✅ Channel follow verification
 
 ### Next Steps
 
@@ -46,7 +54,6 @@ The following features need to be implemented next:
 2. **Enhanced Task Verification**
 
    - "Visit a page" task needs actual verification mechanism
-   - "Follow a channel" task needs Farcaster API integration
 
 3. **User Progress Tracking**
 
@@ -90,6 +97,17 @@ The following environment variables need to be set in `.env.local`:
 - `NEXT_PUBLIC_PROJECT_ID` - Project ID for wallet connections
 - `NEXT_PUBLIC_HOST` - Host URL for the app
 - `NEXT_PUBLIC_ENB_TOKEN_ADDRESS` - ENB token contract address
+- `NEXT_PUBLIC_NEYNAR_API_KEY` - API key for Neynar (obtain from [Neynar](https://neynar.com/))
+
+### Neynar API Setup
+
+This project uses Neynar API for Farcaster user and channel verification. To set up:
+
+1. Visit [Neynar](https://neynar.com/) and create an account
+2. Generate an API key from the dashboard
+3. Add the API key to your `.env.local` file as `NEXT_PUBLIC_NEYNAR_API_KEY`
+
+The API key is sent as the `x-api-key` header to the Neynar API endpoints.
 
 ## Contributing
 
