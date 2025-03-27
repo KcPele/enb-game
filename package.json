@@ -12,6 +12,7 @@
     "@coinbase/onchainkit": "^0.36.9",
     "@farcaster/frame-sdk": "^0.0.26",
     "@geist-ui/core": "^2.3.8",
+    "@neynar/nodejs-sdk": "^2.23.0",
     "canvas": "^3.1.0",
     "geist": "^1.3.1",
     "lucide-react": "^0.474.0",

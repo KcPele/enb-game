@@ -7,7 +7,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   // Initial frame view for ENB Game
   return NextResponse.json({
     version: "vNext",
-    title: "ENB Game - Earn on Base",
+    title: "ENB Game - Follow & Earn",
     ogImage: `${host}/preview.png`,
     // This is the important part - setting the homeUrl makes this a full app frame
     homeUrl: `${host}`,
@@ -31,15 +31,22 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const host = process.env.NEXT_PUBLIC_HOST || req.nextUrl.origin;
 
-    // After the user clicks "Start ENB Game", redirect them to the full app
+    // After the user clicks "Start ENB Game", show the onboarding instructions
     return NextResponse.json({
       version: "vNext",
       frames: [
         {
           version: "vNext",
           image: `${host}/preview.png`,
-          action: "link",
-          target: `${host}`,
+          buttons: [
+            {
+              label: "Open ENB Game",
+              action: "link",
+              target: `${host}`,
+            },
+          ],
+          title: "ENB Game Onboarding",
+          text: "Follow Farcaster accounts and channels to earn points: @kokocodes, @kcpele.eth, /base, @baseafrica",
         },
       ],
     });
