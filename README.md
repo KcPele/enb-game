@@ -36,7 +36,8 @@ A modern, full-featured template for building Farcaster Frames v2 applications w
 - [OnchainKit](https://onchainkit.xyz)
 - [Next.js](https://nextjs.org)
 - [Tailwind CSS](https://tailwindcss.com)
-- [Frames repo](https://github.com/farcasterxyz/frames-v2-demo?tab=readme-ov-file)
+- [Neynar API](https://docs.neynar.com/) - For Farcaster user verification
+- [Base Blockchain](https://docs.base.org/)
 
 ## 🚀 Quick Start
 
@@ -54,6 +55,9 @@ npm install
 ```env
 NEXT_PUBLIC_ONCHAINKIT_API_KEY=your_api_key_here
 NEXT_PUBLIC_HOST=your_host_url # Optional, for production
+NEXT_PUBLIC_PROJECT_ID=your_walletconnect_project_id
+NEXT_PUBLIC_ENB_TOKEN_ADDRESS=your_token_contract_address
+NEXT_PUBLIC_NEYNAR_API_KEY=your_neynar_api_key # Get from https://neynar.com/
 ```
 
 3. **Start Development**
@@ -70,9 +74,16 @@ Visit [http://localhost:3000](http://localhost:3000) to see your app.
 app/
 ├── components/           # React components
 │   ├── Frame.tsx        # Main frame component
-│   └── WalletComponents.tsx
+│   ├── WalletComponents.tsx # Wallet integration components
+│   └── tasks/           # Task-related components
 ├── api/                 # API routes
-│   └── frame/          # Frame endpoints
+│   ├── frame/          # Frame endpoints
+│   └── tasks/          # Task verification endpoints
+├── data/               # Data models and mock tasks
+├── services/           # Service layer for API interactions
+│   ├── neynarApi.ts    # Neynar API integration
+│   └── warpcastApi.ts  # Warpcast API service
+├── types/              # TypeScript types and interfaces
 ├── frames.ts           # Frame configuration
 ├── layout.tsx          # Root layout
 └── page.tsx            # Home page

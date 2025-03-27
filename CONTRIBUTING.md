@@ -13,6 +13,7 @@ Thank you for your interest in contributing to ENB Game! This document provides 
   - [Reporting Bugs](#reporting-bugs)
   - [Feature Requests](#feature-requests)
 - [Task Implementation](#task-implementation)
+- [Working with Neynar API](#working-with-neynar-api)
 - [Testing](#testing)
 - [Documentation](#documentation)
 
@@ -61,7 +62,7 @@ ENB Game is a task-based game on the Base network where users complete tasks to 
    - `NEXT_PUBLIC_PROJECT_ID` - Project ID for wallet connections
    - `NEXT_PUBLIC_HOST` - Host URL for the app
    - `NEXT_PUBLIC_ENB_TOKEN_ADDRESS` - ENB token contract address
-   - `NEXT_PUBLIC_NEYNAR_API_KEY` - API key for Neynar
+   - `NEXT_PUBLIC_NEYNAR_API_KEY` - API key for Neynar (obtain from [Neynar](https://neynar.com/))
 
 4. **Start the Development Server**
 
@@ -89,6 +90,8 @@ app/
 │   └── tasks/           # Task-related components
 ├── data/                 # Data models and mock data
 ├── services/             # Service layer for API interactions
+│   ├── neynarApi.ts     # Neynar API integration
+│   └── warpcastApi.ts   # Warpcast API service
 ├── types/                # TypeScript type definitions
 ├── frames.ts            # Frame configuration
 ├── globals.css          # Global styles
@@ -192,12 +195,60 @@ When implementing new tasks for the game, follow these guidelines:
    - Follow the glass-card styling pattern
    - Implement proper loading and error states
 
+## Working with Neynar API
+
+Neynar API is used for Farcaster user and channel verification. Follow these guidelines when working with the API:
+
+### 1. API Services
+
+- All Neynar API calls should go through the `app/services/neynarApi.ts` service
+- Add new API endpoints as methods to this service
+- Follow the existing pattern for error handling and response parsing
+
+### 2. API Key Management
+
+- Never hardcode the API key in your code
+- Use the environment variable `NEXT_PUBLIC_NEYNAR_API_KEY` for all API calls
+- Include the API key in request headers using the `x-api-key` header
+
+### 3. Key Endpoints
+
+The project currently uses these Neynar API endpoints:
+
+- `/user/custody-address` - Maps wallet addresses to Farcaster FIDs
+- `/user/by_username` - Looks up users by their username
+- `/user/bulk` - Retrieves information about multiple users by FIDs
+- `/followers` - Gets a list of a user's followers with pagination
+- `/user/channels` - Gets all channels a user follows
+- `/channel/search` - Searches for channels by name
+- `/channel/member/list` - Checks if a user is a member of a channel
+
+### 4. Rate Limiting and Caching
+
+- Be mindful of Neynar API rate limits
+- Implement caching for frequently accessed data
+- Use client-side state management to reduce repeated API calls
+
+### 5. Error Handling
+
+- Handle API failures gracefully with clear user feedback
+- Implement fallback mechanisms when possible
+- Log detailed error information for debugging
+
+### 6. Documentation
+
+- Document any new Neynar API integrations you add
+- Update the relevant sections in ENB_GAME_README.md
+- Include examples of response formats in code comments
+
 ## Testing
 
 - Add unit tests for new functionality
 - Test components in isolation
 - Ensure responsive design works on all screen sizes
 - Test wallet connections and blockchain interactions
+- Create mock responses for testing Neynar API integrations
+- Verify task verification logic with different user scenarios
 
 ## Documentation
 
@@ -212,5 +263,7 @@ When implementing new tasks for the game, follow these guidelines:
 - [Base Documentation](https://docs.base.org/)
 - [Viem Documentation](https://viem.sh/docs/getting-started.html)
 - [OnchainKit Documentation](https://onchainkit.xyz/)
+- [Neynar API Documentation](https://docs.neynar.com/reference/getting-started-1)
+- [Neynar API Dashboard](https://neynar.com/dashboard)
 
 Thank you for contributing to ENB Game! Your efforts help make the project better for everyone.
